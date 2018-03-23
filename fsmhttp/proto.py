@@ -81,9 +81,13 @@ class HttpClient(TcpTransport):
             return self.stop()
 
         elif self._bytes_to_read == 0:
-            follow = self._on_response(self._url, self._status[1], self._cookies, self._data, tm)
-            self._state = self.READY
-            return select.EPOLLOUT if follow else self.stop()
+            try:
+                follow = self._on_response(self._url, self._status[1], self._cookies, self._data, tm)
+                self._state = self.READY
+                return select.EPOLLOUT if follow else self.stop()
+            except:
+                logging.critical("Cookies not set for host {}".format(self._host))
+                return self.stop()
 
         self._state = self.WAIT_ANSWER
         return -1
